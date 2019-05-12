@@ -14,3 +14,9 @@ REDIS_CONF = {
     'host': '127.0.0.1',
     'port': 6379
 }
+
+LOGSTASH = {
+    'host': 'localhost',
+    'port': 5559,
+    'version': 1
+}

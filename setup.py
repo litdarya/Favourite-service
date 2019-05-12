@@ -16,6 +16,7 @@ setup(
         'statsd==3.3.0',
         'cassandra-driver>=3.17.0',
         'aiocassandra>=2.0.1',
-        'aioredis', 'locust'
+        'aioredis', 'locust',
+        'python-logstash==0.4.6'
     ]
 )

@@ -67,6 +67,31 @@ services:
     networks:
       - grafana-net
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.0.0
+    ports:
+      - 5601:5601
+    container_name: kibana
+    links:
+      - elasticsearch
+
+
+  logstash:
+    build: ./logstash
+    ports:
+      - 5559:5559
+    container_name: logstash
+    links:
+      - elasticsearch
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.0.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+
 volumes:
   cassandra_data_seed:
   cassandra_data_1:

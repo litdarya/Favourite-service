@@ -2,7 +2,8 @@ import json
 from tornado.web import RequestHandler
 from favourite.services.db_proxy import DBProxy
 from favourite.helpers.statsd import statsd_client
-
+from favourite.elk.context import Context
+from favourite.elk.exceptions import log
 
 class PingHandler(RequestHandler):
     _response = {
@@ -33,6 +34,9 @@ class UserItemHandler(RequestHandler):
     def prepare(self):
         self._get()
 
+        ctx = Context.get(self)
+        ctx.update({"Body": self.request.body})
+
         if self.user is None:
             self.set_status(400)
             self.error_msg.append("user field is empty")
@@ -48,6 +52,7 @@ class UserItemHandler(RequestHandler):
             self.error_msg.append("prohibited symbol ; is in the name")
 
         if self.get_status() != 200:
+            log(Exception(self.error_msg), ctx)
             self.write({
                 "Error msg": self.error_msg
             })
@@ -97,6 +102,9 @@ class GetAllFavourite(RequestHandler):
             self.set_status(400)
 
     def prepare(self):
+        ctx = Context.get(self)
+        ctx.update({"Body": str(self.request.body)})
+
         if self.user is None:
             self.set_status(400)
             self.error_msg.append("user field is empty")
@@ -105,6 +113,7 @@ class GetAllFavourite(RequestHandler):
             self.error_msg.append("prohibited symbol ; is in the name")
 
         if self.get_status() != 200:
+            # log(Exception(self.error_msg), ctx)
             self.write({
                 "Error msg": self.error_msg
             })

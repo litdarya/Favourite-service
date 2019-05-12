@@ -1,0 +1,81 @@
+version: "3"
+
+services:
+  cassandra-seed:
+    image: cassandra:latest
+    ports:
+      - "9042:9042"
+    volumes:
+      - "cassandra_data_seed:/var/lib/cassandra"
+    networks:
+      - cassandra-net
+    environment:
+      - "CASSANDRA_SEEDS=cassandra-seed"
+      - "CASSANDRA_CLUSTER_NAME=Url Provider Cluster"
+      #      needed for setting up custom cluster name
+      - "CASSANDRA_DC=se1"
+      - "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch"
+    restart: always
+
+  cassandra1:
+    image: cassandra:latest
+    volumes:
+      - "cassandra_data_1:/var/lib/cassandra"
+    networks:
+      - cassandra-net
+    environment:
+      - "CASSANDRA_SEEDS=cassandra-seed"
+      - "CASSANDRA_CLUSTER_NAME=Url Provider Cluster"
+      #      needed for setting up custom cluster name
+      - "CASSANDRA_DC=se1"
+      - "CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch"
+    depends_on:
+      - cassandra-seed
+    restart: always
+
+  redis:
+    image: 'bitnami/redis:latest'
+    container_name: redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_favourite:/bitnami/redis/data
+    networks:
+      - redis-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - '3000:3000'
+    networks:
+      - grafana-net
+
+  graphite_statsd:
+    image: graphiteapp/docker-graphite-statsd:latest
+    container_name: graphite-statsd
+    volumes:
+      - graphite_data:/opt/graphite/storage
+    ports:
+      - '8125:8125/udp'
+      - '2003:2003'
+      - '80:80'
+    networks:
+      - grafana-net
+
+volumes:
+  cassandra_data_seed:
+  cassandra_data_1:
+  cassandra_data_2:
+  redis_favourite:
+  grafana_data:
+  graphite_data:
+
+networks:
+  cassandra-net:
+  grafana-net:
+  redis-net:
